@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+	<script type="text/javascript" src="https://cdn.socket.io/socket.io-3.0.1.min.js"></script>
+	<title>Game Search Word</title>
+</head>
+<body>
+	<div class="main">
+
+		<div class="setting-page" >
+			<div class="page-body">
+				<p class="close-setting-button close-button">
+					<i class="fa fa-times"></i></p>
+				<p class="title-menu">PENGATURAN</p>
+				<div class="setting-item ">
+					<span>Tema Malam</span>
+					<span style="display:inline-block;" class="form-check form-switch">
+							<input class="form-check-input night-mode" type="checkbox">
+					</span>
+				</div>
+				<div class="setting-item">
+					<span>Waktu</span> 
+					<span style="display:inline-block;" class="form-check form-switch">
+							<input class="form-check-input timer" type="checkbox" checked>
+					</span>
+				</div>
+				<div class="setting-item">
+					<span>Mode Sulit</span>
+					<span style="display:inline-block;" class="form-check form-switch">
+							<input class="form-check-input hard-mode" type="checkbox">
+					</span>
+				</div>
+				<div class="setting-item">
+					<span>Saran</span>
+					<span style="display:inline-block;margin-right: 0.5rem;color: grey;text-decoration: underline;">
+						<a style="color: grey;" href="mailto:edikurniadidev@gmail.com" target="_blank">Email</a>
+					</span>
+				</div>
+			</div>
+		</div>
+
+		<div class="how-to-play-page">
+			<div class="page-body">
+				<p class="close-how-to-play close-button"><i class="fa fa-times"></i></p>
+				<p class="title-menu">CARA BERMAIN</p>
+				<p>Tebak kata yang dimaksud dalam 6 kali percobaan</p>
+				<p>Setiap tebakan harus merupakan kata yang terdiri dari 5 huruf dan terdapat dalam KBBI. Tekan enter atau tombol jawab untuk memasukan jawaban</p>
+				<p>Setelah setiap tebakan, warna pada kotak huruf mungkin akan berubah dan dapat menjadi petunjuk untuk mencari jawaban yang benar</p>
+				<hr>
+				<p>Aturan:</p>
+				<div class="word-example">
+					<span class="box-letter-example">M</span>
+					<span class="box-letter-example">A</span>
+					<span class="box-letter-example green">N</span>
+					<span class="box-letter-example">D</span>
+					<span class="box-letter-example">I</span>
+				</div>
+				<p></p>
+				<p>huruf <b>N</b> ada dalam kata tebakan dan berada di posisi yang tepat</p>
+				<div class="word-example">
+					<span class="box-letter-example">T</span>
+					<span class="box-letter-example">E</span>
+					<span class="box-letter-example">M</span>
+					<span class="box-letter-example orange">A</span>
+					<span class="box-letter-example">N</span>
+				</div>
+				<p></p>
+				<p>huruf <b>A</b> ada dalam kata tebakan tetapi berada di posisi yang tidak tepat</p>
+				<div class="word-example">
+					<span class="box-letter-example">C</span>
+					<span class="box-letter-example green">E</span>
+					<span class="box-letter-example orange">R</span>
+					<span class="box-letter-example green">A</span>
+					<span class="box-letter-example green">H</span>
+				</div>
+				<p></p>
+				<p>huruf <b>C</b> tidak ada dalam kata tebakan</p>
+			</div>
+		</div>
+
+		<div class="statistic-page">
+			<div class="page-body">
+				<p class="close-statistic close-button"><i class="fa fa-times"></i></p>
+				<p class="title-menu">STATISTIK</p>
+				<div class="statistic-box-container">
+					<div class="statistic-box">
+						<span class="statistic-number number-played">12x</span>
+						<span class="statistic-descrption">bermain</span>
+					</div>
+					<div class="statistic-box">
+						<span class="statistic-number win-percentage">76</span>
+						<span class="statistic-descrption">% berhasil</span>
+					</div>
+					<div class="statistic-box">
+						<span class="statistic-number average-guest">5,4</span>
+						<span class="statistic-descrption">rata-rata tebakan</span>
+					</div>
+					<div class="statistic-box">
+						<span class="statistic-number best-score">834</span>
+						<span class="statistic-descrption">skor terbaik</span>
+					</div>
+				</div>
+				<br><br>
+				<p class="title-menu">DISTRIBUSI JUMLAH TEBAKAN</p>
+				<canvas id="myChart" height="90"></canvas>
+			</div>
+		</div>
+
+		<div class="navbar">
+			<span class="icon">
+				<span class="account" onclick="updateUserName()"><i class="fa fa-bars" aria-hidden="true"></i><span id='username'></span></span>
+				<i class="fa fa-info-circle" aria-hidden="true"></i>
+			</span>
+			<span id="title-game"><img id='logo' src="logo1.png"></span>
+			<span class="icon">
+				<i class="fa fa-users" aria-hidden="true" onclick="findEnemy()"></i>
+				<i class="fa fa-bar-chart" aria-hidden="true"></i>
+				<i class="fa fa-cog" aria-hidden="true"></i>	
+				<!-- <i class="fa fa-cog" aria-hidden="true"></i>		 -->
+			</span>
+		</div>
+
+		<div id='container-words'>		
+			<p id='clock'><span id="minute">--</span>:<span id="second">--</span></p>
+			<div class="word">
+				<span class="box-letter">?</span>
+				<span class="box-letter">?</span>
+				<span class="box-letter">?</span>
+				<span class="box-letter">?</span>
+				<span class="box-letter">?</span>
+			</div>
+		</div>
+
+		<div>
+			<p class="info-player"></p>
+			<p class="info-game">cari lawan main dulu bos</p>
+		</div>
+
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.17/dist/sweetalert2.all.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="nav.js"></script>
+	<script type="text/javascript" src="statistic.js"></script>
+	<script type="text/javascript">
+
+		const socket = io('https://tarung-kata-server.herokuapp.com/');
+		socket.on('connection');
+
+		let AllRooms = [];
+		let createAccountState = true;
+		let myEnemy;
+		let whoIsPlaying;
+		let myTurnPlaying;
+
+		let username = localStorage.username;
+		if(username) {
+			socket.emit('join', username);
+			document.querySelector('#username').innerText = username;
+			createAccountState = false;
+		} else {
+			createAccountState = true;
+			Swal.fire({
+			  title: 'Buat nama server',
+			  html: `<input type="text" id="login" class="swal2-input" placeholder="Username" autocomplete="off">`,
+			  confirmButtonText: 'Masuk ke server',
+			  focusConfirm: false,
+			  allowEnterKey : true,
+			  preConfirm: () => {
+			    const username = Swal.getPopup().querySelector('#login').value
+			    return { username : username }
+			  }
+			}).then((result) => {
+			Swal.fire({
+						title:`masuk ke server sebagai ${result.value.username}`,
+						showConfirmButton : false,
+						timer: 1000,
+						allowEnterKey : true,
+					});
+			socket.emit('join', result.value.username);
+			document.querySelector('#username').innerText = result.value.username;
+			localStorage.username = result.value.username;
+			username = result.value.username;
+			createAccountState = false;
+			})
+		};
+
+
+		const updateUserName = () => {
+			createAccountState = true;
+			socket.emit('delete room', document.querySelector('#username').innerText);
+			Swal.fire({
+			  title: 'Update nama server',
+			  html: `<input type="text" id="login" class="swal2-input" placeholder="Username" autocomplete="off">`,
+			  confirmButtonText: 'Masuk ke server',
+			  focusConfirm: false,
+			  allowEnterKey : true,
+			  preConfirm: () => {
+			    const username = Swal.getPopup().querySelector('#login').value
+			    return { username : username }
+			  }
+			}).then((result) => {
+			Swal.fire({
+						title:`masuk ke server sebagai ${result.value.username}`,
+						showConfirmButton : false,
+						timer: 1000,
+						allowEnterKey : true,
+					});
+			socket.emit('join', result.value.username);
+			document.querySelector('#username').innerText = result.value.username;
+			localStorage.username = result.value.username;
+			username = result.value.username;
+			createAccountState = false;
+			})
+		};
+
+		const invite = (name) => {
+			if(!myEnemy) {
+				socket.emit("invite", {invited: name, inviter: document.querySelector('#username').innerText});
+				Swal.fire({
+							title:`menunggu konfirmasi ${name}`,
+							showConfirmButton : false,
+							allowEnterKey : true,
+						});
+			} else {
+				Swal.fire({
+							title:`kamu masih bertarung dengan ${myEnemy}`,
+							showConfirmButton : false,
+							timer: 1000,
+							allowEnterKey : true,
+						});
+			}
+
+		}
+
+		const findEnemy = () => {
+			username = document.querySelector('#username').innerText;
+			let listEnemyHtml = AllRooms.map( name => {
+									if(name !== username) {
+										return `<div><button onclick="invite('${name}')">${name}</button></div></br>`
+									} 
+								}).join('');
+
+			Swal.fire({
+			  title: 'cari lawan main',
+			  html: listEnemyHtml,
+			  showCloseButton: true,
+			  showConfirmButton : false,
+			})
+		}
+
+		socket.on('want to play?', (data) => {
+			Swal.fire({
+			  title: `${data.inviter} ngajak kamu main ni?`,
+			  showDenyButton: true,
+			  confirmButtonText: 'Oke',
+			  denyButtonText: `Ndak Mau`,
+			}).then((result) => {
+			  /* Read more about isConfirmed, isDenied below */
+			  if (result.isConfirmed) {
+			    socket.emit('invitation-accapted', data)
+			    myEnemy = data.inviter;
+			    whoIsPlaying = data.inviter;
+			    document.querySelector('.info-player').innerText = `sekarang giliran ${whoIsPlaying}`;
+			  } else if (result.isDenied) {
+			    socket.emit('invitation-rejected', data)
+			  }
+			})
+		})
+
+		socket.on('invitation-accapted', (data) => {
+			Swal.fire({
+						title:`oke, silahkan mulai permainanya`,
+						showConfirmButton : false,
+						timer: 1000,
+						allowEnterKey : true,
+					});
+			myEnemy = data.invited;
+			whoIsPlaying = data.inviter;
+			document.querySelector('.info-player').innerText = `sekarang giliran ${whoIsPlaying}`;
+			initializeWord();
+
+		})
+
+		socket.on('invitation-rejected', (data) => {
+			Swal.fire({
+						title:`ajakanmu tidak diterima doi`,
+						showConfirmButton : false,
+						timer: 1000,
+						allowEnterKey : true,
+					});
+		})
+
+		
+		socket.on('update room', (rooms) => {
+			AllRooms = rooms.map(room => room.name);
+			
+		})
+
+	</script>
+	<script type="text/javascript" src="app.js"></script>
+
+
+</body>
+</html>
