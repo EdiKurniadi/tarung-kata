@@ -80,7 +80,7 @@ let initializeWord = (dataFromEnemy) => {
 	let beginWordArray = beginWord.split('');
 	tryWords = [beginWord.toUpperCase()];
 
-	while(containerWords.children.length > 2) {
+	while(containerWords.children[2]) {
 		containerWords.removeChild(containerWords.lastChild);
 	}
 
