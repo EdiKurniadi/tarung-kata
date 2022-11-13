@@ -138,7 +138,7 @@ const getIndex = (lastWord) => {
 // input sound dari asset
 let winSound = new sound('audio/fairy-win.wav');
 let unlockSound = new sound('audio/unlock-game-notification.wav');
-let loseSound = new sound('audio/losing-drums.wav')
+let loseSound = new sound('audio/losing-drums.wav');
 
 
 let timer;
@@ -331,7 +331,7 @@ document.addEventListener('keyup', (event) => {
 				// document.getElementById('minute').innerHTML = '--';
 				// document.getElementById('second').innerHTML = '--';
 			  	
-			  	winSound.play();
+			  	unlockSound.play();
 			  	gameState = 'SETTING MODE';
 			  	infoGame.innerText = infoGameByNumberGuest(containerWords.children.length -1);
 
@@ -544,7 +544,7 @@ socket.on('keyup-from-enemy', key => {
 				// document.getElementById('minute').innerHTML = '--';
 				// document.getElementById('second').innerHTML = '--';
 			  	
-			  	winSound.play();
+			  	unlockSound.play();
 			  	gameState = 'SETTING MODE';
 			  	infoGame.innerText = infoGameByNumberGuest(containerWords.children.length -1);
 
