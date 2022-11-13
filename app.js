@@ -85,8 +85,8 @@ let initializeWord = (dataFromEnemy) => {
 	}
 
 	for(let i = 0 ; i<5 ; i++) {
-		allWords[allWords.length - 1].children[i].style.display = 'inline-block';
-		allWords[allWords.length - 1].children[i].setAttribute('class','box-letter')
+		allWords[allWords.length - 1].children[i].remoteAttribute('style');
+		allWords[allWords.length - 1].children[i].setAttribute('class','box-letter');
 		allWords[allWords.length - 1].children[i].innerHTML = beginWordArray[i].toUpperCase();
 	}
 
