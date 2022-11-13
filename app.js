@@ -29,6 +29,7 @@ function sound(src) {
 let containerWords = document.getElementById('container-words');
 let allWords = document.querySelectorAll('.word');
 let infoGame = document.querySelector('.info-game');
+let infoPlayer = document.querySelector('.info-player');
 let gameFinish = false;
 let settingNumber = [];
 
@@ -63,6 +64,7 @@ let elasticLetter;
 let exceptionLetter;
 
 let initializeWord = (dataFromEnemy) => {
+	// reseContainerWord();
 	let beginWord;
 	let choosenNumber;
 	if(whoIsPlaying === username) {
@@ -78,13 +80,22 @@ let initializeWord = (dataFromEnemy) => {
 	let beginWordArray = beginWord.split('');
 	tryWords = [beginWord.toUpperCase()];
 
+	while(containerWords.children.length > 2) {
+		containerWords.removeChild(containerWords.lastChild);
+	}
+
 	for(let i = 0 ; i<5 ; i++) {
+		allWords[allWords.length - 1].children[i].setAttribute('class','box-letter')
 		allWords[allWords.length - 1].children[i].innerHTML = beginWordArray[i].toUpperCase();
 	}
 
 	fixLetter = [];
 	elasticLetter = [];
 	exceptionLetter = [];
+	gameFinish = false;
+	document.getElementById('minute').innerHTML = '--';
+	document.getElementById('second').innerHTML = '--';
+
 
 	if(settingRuleGame.charAt(0) === 'G') {
 		fixLetter.push({index : choosenNumber, letter : allWords[allWords.length - 1].children[choosenNumber].innerText})
@@ -141,45 +152,86 @@ function startTimer(minute, second){
 			document.getElementById('second').innerHTML = second;
 		} else if(minute >= 0  && second !== 0 ) { //kalau masih ada waktu
 			second--;
-			document.getElementById('minute').innerHTML = minute;
+			// document.getElementById('minute').innerHTML = minute;
 			document.getElementById('second').innerHTML = second;
 		} else { //kalau waktunya sudah habis
 			clearInterval(timer); //hapus hitung mundur
-			gameFinish = true;
 			if(whoIsPlaying === username) {
+				myExEnemy = myEnemy;
+				gameFinish = true;
 				infoGame.innerText = 'Sayang sekali anda kalah';
+				infoPlayer.innerText = '';
 				loseSound.play();
+				let randomNumberForGifDefeat = Math.floor(Math.random()*7);
 				Swal.fire({
-					title:"Sayang sekali waktu sudah habis",
-					showConfirmButton : false,
-					timer: 3000,
-					allowEnterKey : true,
-				});
-			} else {
-				infoGame.innerText = 'Yee kita menang!!!';
-				winSound.play();
-				Swal.fire({
-				  title: 'HOREE!!!',
-				  text: 'Yee kamu berhasil menang, lawanmu cupu',
-				  imageUrl: 'nyanCat.gif',
-				  imageWidth: 400,
-				  imageHeight: 150,
-				  imageAlt: 'berhasil',
-				  html : `<p>Yee kamu berhasil menang, lawanmu cupu</p><br/>`,
+				  title: 'Wuuu!!!',
+				  text: `kamu kalah lawan ${myEnemy}`,
+				  imageUrl: `gif/kalah${randomNumberForGifDefeat}.gif`,
+				  // imageWidth: 400,
+				  imageHeight: 200,
+				  imageAlt: 'kalah',
+				  html : `<p>kamu kalah lawan ${myEnemy}</p>`,
+				  confirmButtonText : `main lagi dengan ${myEnemy}`,
+				  showDenyButton: true,
+				  denyButtonText: 'Cari lawan lain',
 				  showCloseButton : true,
-				  // confirmButtonText : 'statistik',
-				  focusConfirm : false,
 				  allowEnterKey : true,
 				  allowEscapeKey : true,
+				}).then(res => {
+					if(res.isConfirmed) {
+						myEnemy = null;
+						invite(myExEnemy);
+					} else if (res.isDenied) {
+						findEnemy();
+					}
 				})
-
+				socket.emit("my-enemy-win", myEnemy);
+				myEnemy = null;
+			} else {
+				document.getElementById('minute').innerHTML = 0;
+				document.getElementById('second').innerHTML = 0;
 			}
-
 			return;
 		}
 
 	}, 1000);
 }; 
+
+socket.on('you-win', () => {
+	myExEnemy = myEnemy;
+	gameFinish = true;
+	clearInterval(timer);
+	document.getElementById('minute').innerHTML = 0;
+	document.getElementById('second').innerHTML = 0;
+
+	infoGame.innerText = 'Yee kita menang!!!';
+	infoPlayer.innerText = '';
+	winSound.play();
+	let randomNumberForGifWin = Math.floor(Math.random()*5);
+	Swal.fire({
+		title: 'HOREE!!!',
+		text: `Yee kamu berhasil menang, ${myEnemy} cupu`,
+		imageUrl: `gif/menang${randomNumberForGifWin}.gif`,
+		// imageWidth: 400,
+		imageHeight: 200,
+		imageAlt: 'berhasil',
+		html : `<p>Yee kamu berhasil menang, ${myEnemy} cupu</p>`,
+		confirmButtonText : `main lagi dengan ${myEnemy}`,
+		showDenyButton: true,
+		denyButtonText: 'Cari lawan lain',
+		showCloseButton : true,
+		allowEnterKey : true,
+		allowEscapeKey : true,
+	}).then(res => {
+		if(res.isConfirmed) {
+			myEnemy = null;
+			invite(myExEnemy);
+		} else if (res.isDenied) {
+			findEnemy();
+		}
+	})
+	myEnemy = null;
+})
 
 let tryLetter = 0;
 
@@ -191,7 +243,6 @@ document.addEventListener('keyup', (event) => {
 	  if(gameState === 'GUEST MODE') {
 			lastWord = getLastWord();
 			let idx = getIndex(lastWord);
-			  
 
 			if(key.match(/[A-Za-z]/) && key.length === 1 && lastWord.children[4].innerText === '?') {
 				if(tryLetter === 0 && containerWords.children.length === 3) startTimer(1,0);
@@ -277,6 +328,8 @@ document.addEventListener('keyup', (event) => {
 				guestWord = '';
 				tryLetter = 0;
 				clearInterval(timer);
+				// document.getElementById('minute').innerHTML = '--';
+				// document.getElementById('second').innerHTML = '--';
 			  	
 			  	winSound.play();
 			  	gameState = 'SETTING MODE';
@@ -366,6 +419,7 @@ document.addEventListener('keyup', (event) => {
 					exceptionLetter.pop();
 					getLastWord().children[eraseNumber-1].classList.remove('black');
 				}
+				return;
 			}
 
 			if(key === 'Enter') {
@@ -379,18 +433,17 @@ document.addEventListener('keyup', (event) => {
 											<span class="box-letter">?</span>
 											<span class="box-letter">?</span>`
 					containerWords.appendChild(newGuest);
-					if(containerWords.children.length - 8 > 0) {
-						containerWords.children[containerWords.children.length-8].style.display = 'none';
+					if(containerWords.children.length - 6 > 0) {
+						containerWords.children[containerWords.children.length-6].style.display = 'none';
 					}
 
 					gameState = 'GUEST MODE';
 					infoGame.innerText = 'silahkan tebak kata';
-					startTimer(1,1);
 					whoIsPlaying = myEnemy;
-					document.querySelector('.info-player').innerText = `sekarang giliran ${whoIsPlaying}`;
-					// socket.emit('changePlayer', myEnemy);
+					document.querySelector('.info-player').innerHTML = `<i class="fa fa-user-circle" aria-hidden="true"></i> Giliran ${whoIsPlaying.toUpperCase()}:`;
+					startTimer(1,0);
 				}
-
+				return;
 			}
 
 	  };
@@ -488,6 +541,8 @@ socket.on('keyup-from-enemy', key => {
 				guestWord = '';
 				tryLetter = 0;
 				clearInterval(timer);
+				// document.getElementById('minute').innerHTML = '--';
+				// document.getElementById('second').innerHTML = '--';
 			  	
 			  	winSound.play();
 			  	gameState = 'SETTING MODE';
@@ -590,15 +645,15 @@ socket.on('keyup-from-enemy', key => {
 											<span class="box-letter">?</span>
 											<span class="box-letter">?</span>`
 					containerWords.appendChild(newGuest);
-					if(containerWords.children.length - 8 > 0) {
-						containerWords.children[containerWords.children.length-8].style.display = 'none';
+					if(containerWords.children.length - 6 > 0) {
+						containerWords.children[containerWords.children.length-6].style.display = 'none';
 					}
 
 					gameState = 'GUEST MODE';
 					infoGame.innerText = 'silahkan tebak kata';
 					whoIsPlaying = username;
-					document.querySelector('.info-player').innerText = `sekarang giliran ${whoIsPlaying}`;
-					startTimer(1,1);
+					document.querySelector('.info-player').innerHTML = `<i class="fa fa-user-circle" aria-hidden="true"></i> Giliran ${whoIsPlaying.toUpperCase()}:`;
+					startTimer(1,0);
 				}
 
 			}
@@ -610,7 +665,3 @@ socket.on('keyup-from-enemy', key => {
 socket.on('receive-begin-word-from-enemy', (dataFromEnemy) => {
 	initializeWord(dataFromEnemy);
 })
-
-// socket.on('changePlayer', () =>{
-// 	whoIsPlaying = username;
-// })

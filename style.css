@@ -202,6 +202,36 @@ span .fa {
 	background-color: black;
 }
 
+#info-center {
+	text-align: center;
+	/*border: 1px solid red;*/
+}
+
+.info-game {
+	text-align: center;
+	font-size: 1.2rem;
+	margin: 0;
+}
+
+.info-player {
+	text-align: center;
+	font-size: 1.3rem;
+	font-weight: bold;
+	margin: 0;
+}
+
+.enemy-list-wrapper {
+	display: inline-block;
+}
+
+.enemy-list {
+	border: 1px solid blue;
+	border-radius: 10px;
+	padding: 5px 10px;
+	background-color: rgba(0, 0, 255, 0.2);
+	margin: 5px;
+}
+
 form {
 	display: flex;
 	flex-direction: column;

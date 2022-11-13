@@ -121,7 +121,6 @@
 				<i class="fa fa-users" aria-hidden="true" onclick="findEnemy()"></i>
 				<i class="fa fa-bar-chart" aria-hidden="true"></i>
 				<i class="fa fa-cog" aria-hidden="true"></i>	
-				<!-- <i class="fa fa-cog" aria-hidden="true"></i>		 -->
 			</span>
 		</div>
 
@@ -136,7 +135,7 @@
 			</div>
 		</div>
 
-		<div>
+		<div id='info-center'>
 			<p class="info-player"></p>
 			<p class="info-game">cari lawan main dulu bos</p>
 		</div>
@@ -149,162 +148,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="nav.js"></script>
 	<script type="text/javascript" src="statistic.js"></script>
-	<script type="text/javascript">
-
-		const socket = io('https://tarung-kata-server.herokuapp.com/');
-		socket.on('connection');
-
-		let AllRooms = [];
-		let createAccountState = true;
-		let myEnemy;
-		let whoIsPlaying;
-		let myTurnPlaying;
-
-		let username = localStorage.username;
-		if(username) {
-			socket.emit('join', username);
-			document.querySelector('#username').innerText = username;
-			createAccountState = false;
-		} else {
-			createAccountState = true;
-			Swal.fire({
-			  title: 'Buat nama server',
-			  html: `<input type="text" id="login" class="swal2-input" placeholder="Username" autocomplete="off">`,
-			  confirmButtonText: 'Masuk ke server',
-			  focusConfirm: false,
-			  allowEnterKey : true,
-			  preConfirm: () => {
-			    const username = Swal.getPopup().querySelector('#login').value
-			    return { username : username }
-			  }
-			}).then((result) => {
-			Swal.fire({
-						title:`masuk ke server sebagai ${result.value.username}`,
-						showConfirmButton : false,
-						timer: 1000,
-						allowEnterKey : true,
-					});
-			socket.emit('join', result.value.username);
-			document.querySelector('#username').innerText = result.value.username;
-			localStorage.username = result.value.username;
-			username = result.value.username;
-			createAccountState = false;
-			})
-		};
-
-
-		const updateUserName = () => {
-			createAccountState = true;
-			socket.emit('delete room', document.querySelector('#username').innerText);
-			Swal.fire({
-			  title: 'Update nama server',
-			  html: `<input type="text" id="login" class="swal2-input" placeholder="Username" autocomplete="off">`,
-			  confirmButtonText: 'Masuk ke server',
-			  focusConfirm: false,
-			  allowEnterKey : true,
-			  preConfirm: () => {
-			    const username = Swal.getPopup().querySelector('#login').value
-			    return { username : username }
-			  }
-			}).then((result) => {
-			Swal.fire({
-						title:`masuk ke server sebagai ${result.value.username}`,
-						showConfirmButton : false,
-						timer: 1000,
-						allowEnterKey : true,
-					});
-			socket.emit('join', result.value.username);
-			document.querySelector('#username').innerText = result.value.username;
-			localStorage.username = result.value.username;
-			username = result.value.username;
-			createAccountState = false;
-			})
-		};
-
-		const invite = (name) => {
-			if(!myEnemy) {
-				socket.emit("invite", {invited: name, inviter: document.querySelector('#username').innerText});
-				Swal.fire({
-							title:`menunggu konfirmasi ${name}`,
-							showConfirmButton : false,
-							allowEnterKey : true,
-						});
-			} else {
-				Swal.fire({
-							title:`kamu masih bertarung dengan ${myEnemy}`,
-							showConfirmButton : false,
-							timer: 1000,
-							allowEnterKey : true,
-						});
-			}
-
-		}
-
-		const findEnemy = () => {
-			username = document.querySelector('#username').innerText;
-			let listEnemyHtml = AllRooms.map( name => {
-									if(name !== username) {
-										return `<div><button onclick="invite('${name}')">${name}</button></div></br>`
-									} 
-								}).join('');
-
-			Swal.fire({
-			  title: 'cari lawan main',
-			  html: listEnemyHtml,
-			  showCloseButton: true,
-			  showConfirmButton : false,
-			})
-		}
-
-		socket.on('want to play?', (data) => {
-			Swal.fire({
-			  title: `${data.inviter} ngajak kamu main ni?`,
-			  showDenyButton: true,
-			  confirmButtonText: 'Oke',
-			  denyButtonText: `Ndak Mau`,
-			}).then((result) => {
-			  /* Read more about isConfirmed, isDenied below */
-			  if (result.isConfirmed) {
-			    socket.emit('invitation-accapted', data)
-			    myEnemy = data.inviter;
-			    whoIsPlaying = data.inviter;
-			    document.querySelector('.info-player').innerText = `sekarang giliran ${whoIsPlaying}`;
-			  } else if (result.isDenied) {
-			    socket.emit('invitation-rejected', data)
-			  }
-			})
-		})
-
-		socket.on('invitation-accapted', (data) => {
-			Swal.fire({
-						title:`oke, silahkan mulai permainanya`,
-						showConfirmButton : false,
-						timer: 1000,
-						allowEnterKey : true,
-					});
-			myEnemy = data.invited;
-			whoIsPlaying = data.inviter;
-			document.querySelector('.info-player').innerText = `sekarang giliran ${whoIsPlaying}`;
-			initializeWord();
-
-		})
-
-		socket.on('invitation-rejected', (data) => {
-			Swal.fire({
-						title:`ajakanmu tidak diterima doi`,
-						showConfirmButton : false,
-						timer: 1000,
-						allowEnterKey : true,
-					});
-		})
-
-		
-		socket.on('update room', (rooms) => {
-			AllRooms = rooms.map(room => room.name);
-			
-		})
-
-	</script>
+	<script type="text/javascript" src="socket.js"></script>
 	<script type="text/javascript" src="app.js"></script>
 
 
