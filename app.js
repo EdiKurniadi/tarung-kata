@@ -84,11 +84,10 @@ let initializeWord = (dataFromEnemy) => {
 		containerWords.removeChild(containerWords.lastChild);
 	}
 
+	allWords[0].removeAttribute('style');
 	for(let i = 0 ; i<5 ; i++) {
-		allWords = document.querySelectorAll('.word');
-		allWords[allWords.length - 1].children[i].removeAttribute('style');
-		allWords[allWords.length - 1].children[i].setAttribute('class','box-letter');
-		allWords[allWords.length - 1].children[i].innerHTML = beginWordArray[i].toUpperCase();
+		allWords[0].children[i].setAttribute('class','box-letter');
+		allWords[0].children[i].innerHTML = beginWordArray[i].toUpperCase();
 	}
 
 	fixLetter = [];
