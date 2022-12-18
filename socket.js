@@ -1,4 +1,4 @@
-const socket = io('https://tarung-kata-server.herokuapp.com/');
+const socket = io('http://192.168.43.71/3001');
 socket.on('connection');
 
 let AllRooms = [];
