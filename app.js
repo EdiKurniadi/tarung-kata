@@ -163,7 +163,7 @@ function startTimer(minute, second){
 				infoGame.innerText = 'Sayang sekali anda kalah';
 				infoPlayer.innerText = '';
 				loseSound.play();
-				let randomNumberForGifDefeat = Math.floor(Math.random()*7);
+				let randomNumberForGifDefeat = Math.floor(Math.random()*9);
 				Swal.fire({
 				  title: 'Wuuu!!!',
 				  text: `kamu kalah lawan ${myEnemy}`,
@@ -208,7 +208,7 @@ socket.on('you-win', () => {
 	infoGame.innerText = 'Yee kita menang!!!';
 	infoPlayer.innerText = '';
 	winSound.play();
-	let randomNumberForGifWin = Math.floor(Math.random()*5);
+	let randomNumberForGifWin = Math.floor(Math.random()*9);
 	Swal.fire({
 		title: 'HOREE!!!',
 		text: `Yee kamu berhasil menang, ${myEnemy} cupu`,
