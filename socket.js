@@ -1,4 +1,4 @@
-const socket = io('http://192.168.43.71/3001');
+const socket = io('https://tarung-kata-server-production.up.railway.app');
 socket.on('connection');
 
 let AllRooms = [];
