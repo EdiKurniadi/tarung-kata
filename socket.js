@@ -1,4 +1,5 @@
-const socket = io('https://tarung-kata-server-production.up.railway.app');
+// const socket = io('https://tarung-kata-server-production.up.railway.app');
+const socket = io('https://tarungkataserver-edikurniadidev.b4a.run');
 socket.on('connection');
 
 let AllRooms = [];
