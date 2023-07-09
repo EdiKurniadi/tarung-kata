@@ -342,28 +342,28 @@ document.addEventListener('keyup', (event) => {
 				exceptionLetter = [];
 				settingNumber = [];
 
-				// let allWordsArray = document.querySelectorAll('.word');
-				// for(let i = 0 ; i < allWordsArray.length-1 ; i++) {
-				// 	allWordsArray[i].addEventListener('click', function() {
-				// 		fetch(`https://glorious-lime-gharial.cyclic.app/entri/${tryWords[i]}`)
-				// 		.then(response => response.json())
-				// 		.then(data => {
-				// 			if(data.data) {
-				// 				Swal.fire({
-				// 				  title: `<strong><u>${tryWords[i]}</u></strong>`,
-				// 				  icon: 'info',
-				// 				  html: data.data,
-				// 				  showConfirmButton : false,
-				// 				  // showCloseButton: true,
-				// 				})
-				// 			}
-				// 		})
-				// 		.catch(err => {
-				// 			console.log('error lah tog');
-				// 		})	
+				let allWordsArray = document.querySelectorAll('.word');
+				for(let i = 0 ; i < allWordsArray.length-1 ; i++) {
+					allWordsArray[i].addEventListener('click', function() {
+						fetch(`https://glorious-lime-gharial.cyclic.app/entri/${tryWords[i]}`)
+						.then(response => response.json())
+						.then(data => {
+							if(data.data) {
+								Swal.fire({
+								  title: `<strong><u>${tryWords[i]}</u></strong>`,
+								  icon: 'info',
+								  html: data.data,
+								  showConfirmButton : false,
+								  // showCloseButton: true,
+								})
+							}
+						})
+						.catch(err => {
+							console.log('error lah tog');
+						})	
 
-				// 	});
-				// }
+					});
+				}
 				
 				return;
 
