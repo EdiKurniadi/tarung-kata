@@ -5,6 +5,10 @@
 	padding: 0;
 	box-sizing: border-box;
 	font-family: 'Helvatica', sans-serif;
+	-webkit-user-select: none; /* Untuk browser berbasis WebKit (Chrome, Safari) */
+	-moz-user-select: none; /* Untuk browser berbasis Gecko (Firefox) */
+	-ms-user-select: none; /* Untuk browser berbasis Trident (Internet Explorer/Edge) */
+	user-select: none; /* Standar CSS */
 }
 
 
@@ -13,6 +17,7 @@
 	--secondary-color:black;
 	--tersier-color: blueviolet;
 	--border-box: rgba(100,100,100,0.5) ;
+	--bg-exception-letter:  black;
 	--text-unguest-color: black;
 	--text-guest-color: white;
 	/*--button-color: blueviolet;*/
@@ -25,6 +30,7 @@
 	--secondary-color:white;
 	--tersier-color: grey;
 	--border-box: rgba(200,200,200,0.5) ;
+	--bg-exception-letter:  grey;
 	--text-unguest-color: white;
 	--text-guest-color: white;
 }
@@ -46,12 +52,13 @@
 	display: flex;
 	height: 100vh;
 	/*padding: 2vh 0;*/
-	padding-bottom: 8vh;
+	/*padding-bottom: 8vh;*/
 	flex-direction: column;
 	/*border: 1px solid red;*/
 	justify-content: space-between;
 	align-items: center;
 	background-color: var(--primary-color);
+	background-color: -webkit-var(--primary-color);
 	/*background-color: white;*/
 	/*background-color: rgb(20, 20, 20);*/
 }
@@ -80,6 +87,7 @@
 	height: 6vh;
 	position: relative;
 	left: -50%;
+	/*display: none;*/
 	/*top: 0;*/
 
 }
@@ -127,11 +135,11 @@ span .fa {
 #clock {
 	width: 10vh;
 	height: 10vh;
-	margin-bottom: 1rem;
+	margin-bottom: 1.5rem;
 	background-color: var(--tersier-color);
 	border: 5px solid var(--tersier-color);
 	border-radius: 50%;
-	font-size: 1.5rem;
+	font-size: 1.3rem;
 	color: white;
 
 	display: flex;
@@ -155,37 +163,8 @@ span .fa {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-
 }
 
-/*.word .box-letter {
-	border: 2px solid rgba(100,100,100,0.5);
-}
-*/
-/*.word:first-of-type .box-letter:nth-child(odd) {
-	border: 2px solid rgb(150,150,150);
-}
-
-.word:first-of-type .box-letter:nth-child(even) {
-	border-top: 2px solid rgb(150,150,150);
-	border-bottom: 2px solid rgb(150,150,150);
-}
-
-.word:not(:first-of-type) .box-letter:nth-child(odd) {
-	border-right: 2px solid rgb(150,150,150);
-	border-left: 2px solid rgb(150,150,150);
-	border-bottom: 2px solid rgb(150,150,150);
-	border: 2px solid rgb(150,150,150);
-}
-
-.word:not(:first-of-type) .box-letter:nth-child(even) {
-	border-top: 2px solid rgb(150,150,150);
-	border-bottom: 2px solid rgb(150,150,150);
-}
-
-.word:last-of-type .box-letter {
-	color: rgba(150, 150, 150, 1.0);
-}*/
 
 .green {
 	color: var(--text-guest-color);
@@ -199,21 +178,38 @@ span .fa {
 
 .black {
 	color: var(--text-guest-color);
-	background-color: black;
+	background-color: var(--bg-exception-letter) !important;
 }
 
 #info-center {
+	color: var(--secondary-color);
 	text-align: center;
+	vertical-align: middle;
+	height: 5rem;
+	/*line-height: 5rem;*/
+	width: 80vw;
 	/*border: 1px solid red;*/
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	/*transform: translateY(50%);*/
+}
+
+.info-center-box {
+	margin: auto;
+	/*border: 1px solid blue;*/
+	/*top: 50%;*/
 }
 
 .info-game {
+	color: var(--secondary-color);
 	text-align: center;
-	font-size: 1.2rem;
+	font-size: 1.1rem;
 	margin: 0;
 }
 
 .info-player {
+	color: var(--secondary-color);
 	text-align: center;
 	font-size: 1.3rem;
 	font-weight: bold;
@@ -279,6 +275,39 @@ form {
 	padding: 0 10vw;
 	text-align: center;
 	color: var(--secondary-color);
+}
+
+
+.keyboard-wrapper {
+	display: flex;
+	flex-direction: column;
+	/*border: 1px solid red;*/
+}
+
+.keyboard {
+	display: flex;
+	justify-content: center;
+	margin: 5px 0;
+}
+
+.key {
+	background-color: var(--border-box);
+	color: var(--secondary-color);
+	border: 1px solid grey;
+	margin: 0 2px;
+	width: 30px;
+	height: 40px;
+	line-height: 40px;
+	text-align: center;
+	vertical-align: middle;
+	border-radius: 10%;
+	cursor: pointer;
+}
+
+.del-key,
+.enter-key {
+	/*font-size: 10px;*/
+	width: 60px;
 }
 
 
@@ -426,12 +455,148 @@ form {
 	/*height: 40vh;*/
 }
 
-/*@keyframes fadingin {
-    0% { opacity: 0%; }
-    100% { opacity: 100%; }
-}
+@media only screen and (max-width: 767px) {
+  /* Gaya CSS untuk perangkat dengan lebar layar maksimum 767px */
+  /* Misalnya, gaya untuk ponsel */
 
-@keyframes fadingout {
-    0% { opacity: 100%; }
-    100% { opacity: 0%; }
-}*/
+ 
+	.main {
+		display: flex;
+		height: 100vh;
+		/*padding: 2vh 0;*/
+		padding-bottom: 1.5vh;
+		flex-direction: column;
+		/*border: 1px solid red;*/
+		justify-content: space-between;
+		align-items: center;
+		background-color: var(--primary-color);
+	}
+
+	.page-body {
+		/*background-color: var(--primary-color); */
+		background-color: transparent;
+		width: 90vw; 
+		height: inherit; 
+		padding: 1rem; 
+		border-radius: 5px;  
+	}
+
+	.icon {
+		margin: 0 0.8rem;
+		color: var(--secondary-color);
+	}
+
+	.account {
+		font-size: 1.3rem;
+		border: 2px solid black;
+		border-radius: 10px;
+		padding: 0 5px;
+		cursor: pointer;
+	}
+
+	span .fa {
+		display: inline-block;
+		font-size: 1.3rem;
+		margin: 0.5rem;
+		cursor: pointer;
+	}
+
+
+	#clock {
+		width: 9vh;
+		height: 9vh;
+		margin-bottom: 0.7rem;
+		background-color: var(--tersier-color);
+		border: 5px solid var(--tersier-color);
+		border-radius: 50%;
+		font-size: 1.3rem;
+		color: white;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.word {
+		display: flex;
+		/*gap: 0.15rem;*/
+		/*transition: 1s;*/
+	}
+	 
+	.box-letter {
+		width: 12.5vw;
+		height: 12.5vw;
+		font-size: 1.3rem;
+		font-weight: 700;
+		border: 2px solid var(--border-box);
+		color: var(--text-unguest-color);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 0.1rem;
+	}
+
+	.green {
+		color: var(--text-guest-color);
+		background-color: limegreen !important;
+	}
+
+	.orange {
+		color: var(--text-guest-color);
+		background-color: orange;
+	}
+
+	.black {
+		color: var(--text-guest-color);
+		background-color: grey;
+	}
+
+
+	#info-center {
+		color: var(--secondary-color);
+		text-align: center;
+	}
+
+	.info-game {
+		color: var(--secondary-color);
+		text-align: center;
+		font-size: 1.1rem;
+		margin: 0;
+	}
+
+	.info-player {
+		color: var(--secondary-color);
+		text-align: center;
+		font-size: 1.2rem;
+		font-weight: bold;
+		margin: 0;
+	}
+
+	.keyboard {
+		display: flex;
+		justify-content: center;
+		margin: 0.15rem 0;
+		}
+
+	.key {
+		background-color: var(--border-box);
+		color: var(--secondary-color);
+		border: 1px solid transparent;
+		margin: 0 2px;
+		width: 8vw;
+		height: 12vw;
+		line-height: 12vw;
+		text-align: center;
+		vertical-align: middle;
+		border-radius: 10%;
+		cursor: pointer;
+	}
+
+	.del-key,
+	.enter-key {
+		/*font-size: 10px;*/
+		width: 16vw;
+	}
+
+
+}
