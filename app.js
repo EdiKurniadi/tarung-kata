@@ -24,7 +24,6 @@ function sound(src) {
   }
 };
 
-
 //setting awal untuk bagian kata tebakan
 let containerWords = document.getElementById('container-words');
 let allWords = document.querySelectorAll('.word');
@@ -32,7 +31,6 @@ let infoGame = document.querySelector('.info-game');
 let infoPlayer = document.querySelector('.info-player');
 let gameFinish = false;
 let settingNumber = [];
-
 let settingRuleGame = 'GOBBG'; //setting rule game harus sesuai dengan jumlah huruf kata
 let nameColor = {
 	'G' : 'Hijau',
@@ -56,15 +54,34 @@ let infoGameByNumberGuest = (numberGuest) => {
 	return `Pilih kotak yang akan menjadi ${nameColor[settingRuleGame.charAt(0)]}, ${nameColor[settingRuleGame.charAt(1)]}, ${nameColor[settingRuleGame.charAt(2)]}, ${nameColor[settingRuleGame.charAt(3)]} dan ${nameColor[settingRuleGame.charAt(4)]}`;
 }
 
+let getMeaning = async (word) => {
+	fetch(`https://glorious-lime-gharial.cyclic.app/entri/${word}`)
+	.then(response => response.json())
+	.then(data => {
+		defineTryWords.push(data.data)
+		// getLastWord().addEventListener('click', function() {
+		// 	Swal.fire({
+		// 	  title: `<strong><u>${word}</u></strong>`,
+		// 	  icon: 'info',
+		// 	  html: data.data,
+		// 	  showConfirmButton : false,
+		// 	})
+		// });
+	})
+	.catch(err => {
+		defineTryWords.push("definisi tidak ditemukan");
+		console.log('error lah tog');
+	})	
+}
 
 //menentukan kata permulaan, dan huruf2nya dipisah dalah beginWordArray
-let tryWords;
-let fixLetter;
-let elasticLetter;
-let exceptionLetter;
+let tryWords; //kata yang akan dicoba oleh user
+let defineTryWords = []; //berisi arti dari tryWords
+let fixLetter; //huruf yang harus ada dan posisinya sudah ditentukan serta ditandai dengan kotak hijau
+let elasticLetter; //huruf yang harus ada serta ditandai dengan kotak orange
+let exceptionLetter; //huruf yang tidak boleh ada dan ditandai dengan kotak hitam
 
 let initializeWord = (dataFromEnemy) => {
-	// reseContainerWord();
 	let beginWord;
 	let choosenNumber;
 	if(whoIsPlaying === username) {
@@ -79,6 +96,7 @@ let initializeWord = (dataFromEnemy) => {
 
 	let beginWordArray = beginWord.split('');
 	tryWords = [beginWord.toUpperCase()];
+	getMeaning(beginWord.toLowerCase());
 
 	while(containerWords.children[2]) {
 		containerWords.removeChild(containerWords.lastChild);
@@ -129,6 +147,11 @@ const getLastWord = () => {
 	return allWords[allWords.length - 1];
 }
 
+const getLastTwoWord = () => {
+	let allWords = document.querySelectorAll('.word');
+	return allWords[allWords.length - 2];
+}
+
 const getIndex = (lastWord) => {
 	for(let i = 0 ; i < 5 ; i++) {
 		if(lastWord.children[i].innerText === '?') return i;
@@ -140,6 +163,28 @@ const getIndex = (lastWord) => {
 let winSound = new sound('audio/fairy-win.wav');
 let unlockSound = new sound('audio/unlock-game-notification.wav');
 let loseSound = new sound('audio/losing-drums.wav');
+
+function findTheMissWord() {
+	let missWords = [...wordsHard];
+
+	for(let j = 0; j < fixLetter.length ; j++) {
+		missWords = missWords.filter(word => word.charAt(fixLetter[j].index) === fixLetter[j].letter.toLowerCase());
+	}
+
+	for(let j = 0; j < elasticLetter.length ; j++) {
+		missWords = missWords.filter(word => word.includes(elasticLetter[j].toLowerCase()));
+	}
+
+	for(let j = 0; j < exceptionLetter.length ; j++) {
+		missWords = missWords.filter(word => !word.includes(exceptionLetter[j].toLowerCase()));
+	}
+
+	for(let j = 0; j < tryWords.length ; j++) {
+		missWords = missWords.filter(word => word !== tryWords[j])
+	}
+
+	return missWords;
+}
 
 
 let timer;
@@ -153,17 +198,17 @@ function startTimer(minute, second){
 			document.getElementById('second').innerHTML = second;
 		} else if(minute >= 0  && second !== 0 ) { //kalau masih ada waktu
 			second--;
-			// document.getElementById('minute').innerHTML = minute;
 			document.getElementById('second').innerHTML = second;
 		} else { //kalau waktunya sudah habis
 			clearInterval(timer); //hapus hitung mundur
+			// console.log("missword",findTheMissWord());
 			if(whoIsPlaying === username) {
 				myExEnemy = myEnemy;
 				gameFinish = true;
-				infoGame.innerText = 'Sayang sekali anda kalah';
+				infoGame.innerText = findTheMissWord() ? `sayang sekali, padahal masih ada ${findTheMissWord()[0]}` : `kalah skak mat`;
 				infoPlayer.innerText = '';
 				loseSound.play();
-				let randomNumberForGifDefeat = Math.floor(Math.random()*9);
+				let randomNumberForGifDefeat = Math.floor(Math.random()*7);
 				Swal.fire({
 				  title: 'Wuuu!!!',
 				  text: `kamu kalah lawan ${myEnemy}`,
@@ -205,10 +250,10 @@ socket.on('you-win', () => {
 	document.getElementById('minute').innerHTML = 0;
 	document.getElementById('second').innerHTML = 0;
 
-	infoGame.innerText = 'Yee kita menang!!!';
+	infoGame.innerText = 'Yee kamu menang!!!';
 	infoPlayer.innerText = '';
 	winSound.play();
-	let randomNumberForGifWin = Math.floor(Math.random()*9);
+	let randomNumberForGifWin = Math.floor(Math.random()*5);
 	Swal.fire({
 		title: 'HOREE!!!',
 		text: `Yee kamu berhasil menang, ${myEnemy} cupu`,
@@ -255,7 +300,7 @@ document.addEventListener('keyup', (event) => {
 			 
 			if(key === 'Backspace') {
 			  	if(idx > 0) lastWord.children[idx-1].innerText = '?';
-			  	infoGame.innerText = 'silahkan tebak kata'
+			  	infoGame.innerText = 'silahkan tebak kata';
 			  	return;
 			};
 
@@ -273,6 +318,7 @@ document.addEventListener('keyup', (event) => {
 						showConfirmButton : false,
 						timer: 1000,
 						allowEnterKey : true,
+						allowOutsideClick: false,
 					});
 					return;
 				};
@@ -283,6 +329,7 @@ document.addEventListener('keyup', (event) => {
 						showConfirmButton : false,
 						timer: 1000,
 						allowEnterKey : true,
+						allowOutsideClick: false,
 					});
 					return;
 				};
@@ -294,6 +341,7 @@ document.addEventListener('keyup', (event) => {
 							showConfirmButton : false,
 							timer: 1000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 						return;
 					};
@@ -306,6 +354,7 @@ document.addEventListener('keyup', (event) => {
 							showConfirmButton : false,
 							timer: 1000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 						return;
 					};
@@ -319,18 +368,18 @@ document.addEventListener('keyup', (event) => {
 							showConfirmButton : false,
 							timer: 1000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 						return;
 					};
 				};
 
-				//update data yang harus diubah setiap ada tebakan baru
+				//update data yang harus diubah setiap ada tebakan baru yang valid
 				tryWords.push(guestWord);
+				getMeaning(guestWord.toLowerCase());
 				guestWord = '';
 				tryLetter = 0;
 				clearInterval(timer);
-				// document.getElementById('minute').innerHTML = '--';
-				// document.getElementById('second').innerHTML = '--';
 			  	
 			  	unlockSound.play();
 			  	gameState = 'SETTING MODE';
@@ -342,34 +391,18 @@ document.addEventListener('keyup', (event) => {
 				exceptionLetter = [];
 				settingNumber = [];
 
-				let allWordsArray = document.querySelectorAll('.word');
-				for(let i = 0 ; i < allWordsArray.length-1 ; i++) {
-					allWordsArray[i].addEventListener('click', function() {
-						fetch(`https://glorious-lime-gharial.cyclic.app/entri/${tryWords[i]}`)
-						.then(response => response.json())
-						.then(data => {
-							if(data.data) {
-								Swal.fire({
-								  title: `<strong><u>${tryWords[i]}</u></strong>`,
-								  icon: 'info',
-								  html: data.data,
-								  showConfirmButton : false,
-								  // showCloseButton: true,
-								})
-							}
-						})
-						.catch(err => {
-							console.log('error lah tog');
-						})	
-
+				let lastWordLetterArray = getLastWord().children;
+				for(let i = 0 ; i < lastWordLetterArray.length ; i++) {
+					lastWordLetterArray[i].addEventListener('click', function() {
+					  let keyboardEvent = new KeyboardEvent('keyup', { key: i+1 });
+					  document.dispatchEvent(keyboardEvent);
 					});
 				}
-				
+
+
 				return;
 
 	  		};
-
-	  	
 
 	  };
 
@@ -392,6 +425,7 @@ document.addEventListener('keyup', (event) => {
 							showConfirmButton : false,
 							timer: 2000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 					};
 					return;
@@ -407,6 +441,7 @@ document.addEventListener('keyup', (event) => {
 							showConfirmButton : false,
 							timer: 2000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 					};
 					return;
@@ -423,6 +458,7 @@ document.addEventListener('keyup', (event) => {
 							showConfirmButton : false,
 							timer: 2000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 					};
 					return;
@@ -446,7 +482,38 @@ document.addEventListener('keyup', (event) => {
 				return;
 			}
 
-			if(key === 'Enter') {
+
+			if(key === 'Enter' && currentRuleGame.length === settingNumber.length) {
+
+				//menambahkan definisi
+				let allWordsArray = document.querySelectorAll('.word');
+				for(let i = 0 ; i < allWordsArray.length ; i++) {
+					allWordsArray[i].addEventListener('click', function() {
+						Swal.fire({
+							title: `<strong><u>${tryWords[i]}</u></strong>`,
+							icon: 'info',
+							html: defineTryWords[i],
+							showConfirmButton : false,
+						})
+					});
+				}
+
+				// getLastWord().addEventListener('click', function() {
+				// 	Swal.fire({
+				// 		title: `<strong><u>${tryWords[tryWords.length-1]}</u></strong>`,
+				// 		icon: 'info',
+				// 		html: defineTryWords[defineTryWords.length-1],
+				// 		showConfirmButton : false,
+				// 	})
+				// });
+
+
+
+				//mematikan dispatch agar huruf2 tidak bisa diklik
+				let lastWordLetterArray = getLastWord().children;
+				for(let i = 0 ; i < lastWordLetterArray.length ; i++) {
+					lastWordLetterArray[i].style.pointerEvents = 'none';
+				}
 				//memasukan tebakan ke daftar tebakan
 				if(currentRuleGame.length === settingNumber.length) {
 					let newGuest = document.createElement('div');
@@ -469,6 +536,8 @@ document.addEventListener('keyup', (event) => {
 				}
 				return;
 			}
+
+
 
 	  };
 	};
@@ -509,6 +578,7 @@ socket.on('keyup-from-enemy', key => {
 						showConfirmButton : false,
 						timer: 1000,
 						allowEnterKey : true,
+						allowOutsideClick: false,
 					});
 					return;
 				};
@@ -519,6 +589,7 @@ socket.on('keyup-from-enemy', key => {
 						showConfirmButton : false,
 						timer: 1000,
 						allowEnterKey : true,
+						allowOutsideClick: false,
 					});
 					return;
 				};
@@ -530,6 +601,7 @@ socket.on('keyup-from-enemy', key => {
 							showConfirmButton : false,
 							timer: 1000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 						return;
 					};
@@ -542,6 +614,7 @@ socket.on('keyup-from-enemy', key => {
 							showConfirmButton : false,
 							timer: 1000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 						return;
 					};
@@ -555,6 +628,7 @@ socket.on('keyup-from-enemy', key => {
 							showConfirmButton : false,
 							timer: 1000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 						return;
 					};
@@ -562,6 +636,7 @@ socket.on('keyup-from-enemy', key => {
 
 				//update data yang harus diubah setiap ada tebakan baru
 				tryWords.push(guestWord);
+				getMeaning(guestWord.toLowerCase());
 				guestWord = '';
 				tryLetter = 0;
 				clearInterval(timer);
@@ -577,6 +652,28 @@ socket.on('keyup-from-enemy', key => {
 				elasticLetter = [];
 				exceptionLetter = [];
 				settingNumber = [];
+
+				//menambahkan definisi
+				let allWordsArray = document.querySelectorAll('.word');
+				for(let i = 0 ; i < allWordsArray.length ; i++) {
+					allWordsArray[i].addEventListener('click', function() {
+						Swal.fire({
+							title: `<strong><u>${tryWords[i]}</u></strong>`,
+							icon: 'info',
+							html: defineTryWords[i],
+							showConfirmButton : false,
+						})
+					});
+				}
+				// getLastWord().addEventListener('click', function() {
+				// 	Swal.fire({
+				// 		title: `<strong><u>${tryWords[tryWords.length-1]}</u></strong>`,
+				// 		icon: 'info',
+				// 		html: defineTryWords[defineTryWords.length-1],
+				// 		showConfirmButton : false,
+				// 	})
+				// });
+
 
 				return;
 
@@ -605,6 +702,7 @@ socket.on('keyup-from-enemy', key => {
 							showConfirmButton : false,
 							timer: 2000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 					};
 					return;
@@ -620,6 +718,7 @@ socket.on('keyup-from-enemy', key => {
 							showConfirmButton : false,
 							timer: 2000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 					};
 					return;
@@ -636,6 +735,7 @@ socket.on('keyup-from-enemy', key => {
 							showConfirmButton : false,
 							timer: 2000,
 							allowEnterKey : true,
+							allowOutsideClick: false,
 						});
 					};
 					return;
@@ -659,6 +759,19 @@ socket.on('keyup-from-enemy', key => {
 			}
 
 			if(key === 'Enter') {
+				//menambahkan definisi
+				// let allWordsArray = document.querySelectorAll('.word');
+				// for(let i = 0 ; i < allWordsArray.length-1 ; i++) {
+				// 	allWordsArray[i].addEventListener('click', function() {
+				// 		Swal.fire({
+				// 			title: `<strong><u>${tryWords[i]}</u></strong>`,
+				// 			icon: 'info',
+				// 			html: defineTryWords[i],
+				// 			showConfirmButton : false,
+				// 		})
+				// 	});
+				// }
+
 				//memasukan tebakan ke daftar tebakan
 				if(currentRuleGame.length === settingNumber.length) {
 					let newGuest = document.createElement('div');
@@ -688,4 +801,70 @@ socket.on('keyup-from-enemy', key => {
 
 socket.on('receive-begin-word-from-enemy', (dataFromEnemy) => {
 	initializeWord(dataFromEnemy);
-})
+}) 
+
+
+
+let platform = window.navigator.platform;
+let userAgent = navigator.userAgent;
+let viewportWidth = window.innerWidth;
+
+// window.alert(userAgent)
+// Mengambil elemen tombol menggunakan ID
+let keyboardButtons = document.querySelectorAll(".key");
+
+
+
+if(viewportWidth < 767 || /Android|iPhone|iPad|iPod/i.test(platform) || /Mobi|Apple|Android/i.test(userAgent) ) {
+
+	// window.alert('HP')
+	document.querySelector('#logo').style.display = "none";
+
+	for(let i = 0 ; i < keyboardButtons.length ; i++) {
+		// Menambahkan event listener ke elemen tombol
+		keyboardButtons[i].addEventListener('touchstart', function() {
+		  // Membuat peristiwa keyboard event
+		  let keyboardEvent = new KeyboardEvent('keyup', { key: keyboardButtons[i].innerText });
+		  if(keyboardButtons[i].innerText === "Delete") keyboardEvent = new KeyboardEvent('keyup', { key: "Backspace" });
+		  // Memicu peristiwa keyboard event pada elemen dokumen
+		  document.dispatchEvent(keyboardEvent);
+		});
+	}
+
+	// Mengambil elemen menggunakan ID
+	let main = document.querySelector('.main');
+
+	// Inisialisasi variabel terakhir kali disentuh
+	let lastTouchTime = 0;
+
+	// Menambahkan event listener untuk double tap
+	main.addEventListener('touchstart', function(event) {
+	  let currentTime = new Date().getTime();
+	  let tapLength = currentTime - lastTouchTime;
+
+	  // Memeriksa jika double tap terjadi dalam waktu 300ms
+	  if (tapLength < 300 && tapLength > 0) {
+	    event.preventDefault();
+	    // Aksi yang ingin dilakukan saat double tap terjadi
+	    console.log('Double tap terdeteksi');
+	  }
+
+	  lastTouchTime = currentTime;
+	});
+
+} else {
+
+	// window.alert('Desktop')
+	for(let i = 0 ; i < keyboardButtons.length ; i++) {
+		// Menambahkan event listener ke elemen tombol
+		keyboardButtons[i].addEventListener('click', function() {
+		  // Membuat peristiwa keyboard event
+		  let keyboardEvent = new KeyboardEvent('keyup', { key: keyboardButtons[i].innerText });
+		  if(keyboardButtons[i].innerText === "Delete") keyboardEvent = new KeyboardEvent('keyup', { key: "Backspace" });
+		  // Memicu peristiwa keyboard event pada elemen dokumen
+		  document.dispatchEvent(keyboardEvent);
+		});
+	}
+
+}
+
